@@ -26,6 +26,11 @@ class VideoPlayerApp(QWidget):
         self.toggle_size_button.clicked.connect(self.toggle_size)
         top_layout.addWidget(self.toggle_size_button)
 
+        # Pause/Play button
+        self.pause_play_button = QPushButton('Pause')
+        self.pause_play_button.clicked.connect(self.toggle_pause_play)
+        top_layout.addWidget(self.pause_play_button)
+
         # Main layout
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
@@ -42,6 +47,7 @@ class VideoPlayerApp(QWidget):
 
         self.cap = None
         self.current_frame = None
+        self.is_paused = False  # Flag to track if the video is paused
         self.is_half_size = False  # Track whether the video is in half size or full size
 
     def open_video(self):
@@ -63,7 +69,7 @@ class VideoPlayerApp(QWidget):
         self.timer.start(30)  # 30 ms per frame (~33 FPS)
 
     def update_frame(self):
-        if self.cap is not None:
+        if self.cap is not None and not self.is_paused:
             ret, frame = self.cap.read()
             if ret:
                 # Convert frame to RGB (OpenCV uses BGR)
@@ -95,6 +101,15 @@ class VideoPlayerApp(QWidget):
             self.toggle_size_button.setText('Toggle Size (Full Size)')
         else:
             self.toggle_size_button.setText('Toggle Size (Half Size)')
+
+    def toggle_pause_play(self):
+        # Toggle the play/pause state
+        self.is_paused = not self.is_paused
+
+        if self.is_paused:
+            self.pause_play_button.setText('Play')
+        else:
+            self.pause_play_button.setText('Pause')
 
 
 if __name__ == "__main__":
