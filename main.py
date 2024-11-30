@@ -16,8 +16,8 @@ class VideoPlayerApp(QWidget):
         # Layout for the buttons at the top
         top_layout = QHBoxLayout()
 
-        # Play button
-        self.play_button = QPushButton('Open Video')
+        # Change the button text to "Choose Video"
+        self.play_button = QPushButton('Choose Video')
         self.play_button.clicked.connect(self.open_video)
         top_layout.addWidget(self.play_button)
 
@@ -52,7 +52,7 @@ class VideoPlayerApp(QWidget):
 
     def open_video(self):
         # Open file dialog to select a video
-        video_file, _ = QFileDialog.getOpenFileName(self, "Open Video", "", "Video Files (*.mp4 *.avi *.mov)")
+        video_file, _ = QFileDialog.getOpenFileName(self, "Choose Video", "", "Video Files (*.mp4 *.avi *.mov)")
 
         if video_file:
             self.play_video(video_file)
