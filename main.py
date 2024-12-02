@@ -5,28 +5,32 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPu
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer
 
-
 class VideoPlayerApp(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('OpenCV Video Player')
+        self.setWindowTitle('OpenCV Media Player')
         self.setGeometry(100, 100, 800, 600)
 
         # Layout for the buttons at the top
         top_layout = QHBoxLayout()
 
-        # Change the button text to "Choose Video"
+        # Button to choose a video
         self.play_button = QPushButton('Choose Video')
         self.play_button.clicked.connect(self.open_video)
         top_layout.addWidget(self.play_button)
+
+        # Button to choose an image
+        self.image_button = QPushButton('Choose Image')
+        self.image_button.clicked.connect(self.open_image)
+        top_layout.addWidget(self.image_button)
 
         # Toggle size button
         self.toggle_size_button = QPushButton('Toggle Size (Half Size)')
         self.toggle_size_button.clicked.connect(self.toggle_size)
         top_layout.addWidget(self.toggle_size_button)
 
-        # Pause/Play button
+        # Pause/Play button (only for video)
         self.pause_play_button = QPushButton('Pause')
         self.pause_play_button.clicked.connect(self.toggle_pause_play)
         top_layout.addWidget(self.pause_play_button)
@@ -35,9 +39,9 @@ class VideoPlayerApp(QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
 
-        # Video display label
-        self.video_label = QLabel(self)
-        layout.addWidget(self.video_label)
+        # Video/Image display label
+        self.media_label = QLabel(self)
+        layout.addWidget(self.media_label)
 
         self.setLayout(layout)
 
@@ -48,7 +52,10 @@ class VideoPlayerApp(QWidget):
         self.cap = None
         self.current_frame = None
         self.is_paused = False  # Flag to track if the video is paused
-        self.is_half_size = False  # Track whether the video is in half size or full size
+        self.is_half_size = False  # Track whether the video or image is in half size or full size
+        self.is_video = False  # Track if the media is a video or an image
+        self.image = None  # Store the loaded image
+        self.original_image = None  # Store the original unmodified image for reset
 
     def open_video(self):
         # Open file dialog to select a video
@@ -57,6 +64,13 @@ class VideoPlayerApp(QWidget):
         if video_file:
             self.play_video(video_file)
 
+    def open_image(self):
+        # Open file dialog to select an image
+        image_file, _ = QFileDialog.getOpenFileName(self, "Choose Image", "", "Images (*.png *.jpg *.bmp *.jpeg)")
+
+        if image_file:
+            self.display_image(image_file)
+
     def play_video(self, video_path):
         # Open the video file using OpenCV
         self.cap = cv2.VideoCapture(video_path)
@@ -64,6 +78,9 @@ class VideoPlayerApp(QWidget):
         if not self.cap.isOpened():
             print("Error: Could not open video.")
             return
+
+        # Mark that the current media is a video
+        self.is_video = True
 
         # Start the timer to read and display frames
         self.timer.start(30)  # 30 ms per frame (~33 FPS)
@@ -85,7 +102,7 @@ class VideoPlayerApp(QWidget):
                 qimg = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
                 # Set the QImage as a pixmap on the label
-                self.video_label.setPixmap(QPixmap.fromImage(qimg))
+                self.media_label.setPixmap(QPixmap.fromImage(qimg))
 
                 # Resize the window based on video size
                 self.resize(w, h)
@@ -93,8 +110,39 @@ class VideoPlayerApp(QWidget):
                 self.cap.release()
                 self.timer.stop()  # Stop the timer when video ends
 
+    def display_image(self, image_path):
+        # Open the image using OpenCV
+        self.image = cv2.imread(image_path)
+        if self.image is None:
+            print("Error: Could not open image.")
+            return
+
+        # Store the original image for future resizing
+        self.original_image = self.image.copy()
+
+        # Mark that the current media is an image
+        self.is_video = False
+
+        # Resize the image if in half size mode
+        if self.is_half_size:
+            self.image = cv2.resize(self.image, (self.image.shape[1] // 2, self.image.shape[0] // 2))
+
+        # Convert the image to RGB (OpenCV uses BGR)
+        rgb_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+
+        # Convert to QImage for displaying in PyQt
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        qimg = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+
+        # Set the QImage as a pixmap on the label
+        self.media_label.setPixmap(QPixmap.fromImage(qimg))
+
+        # Resize the window based on image size
+        self.resize(w, h)
+
     def toggle_size(self):
-        # Toggle the size of the video between full size and half size
+        # Toggle the size of the media (video or image) between full size and half size
         self.is_half_size = not self.is_half_size
 
         if self.is_half_size:
@@ -102,8 +150,38 @@ class VideoPlayerApp(QWidget):
         else:
             self.toggle_size_button.setText('Toggle Size (Half Size)')
 
+        # If it's a video, adjust the video size
+        if self.is_video and self.cap is not None:
+            self.update_frame()  # Refresh video display
+        # If it's an image, adjust the image size
+        elif not self.is_video and self.image is not None:
+            # Resize the image
+            if self.is_half_size:
+                self.image = cv2.resize(self.original_image,
+                                        (self.original_image.shape[1] // 2, self.original_image.shape[0] // 2))
+            else:
+                # Reset the image to full size
+                self.image = self.original_image.copy()
+
+            # Convert to RGB (OpenCV uses BGR)
+            rgb_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+
+            # Convert to QImage for displaying in PyQt
+            h, w, ch = rgb_image.shape
+            bytes_per_line = ch * w
+            qimg = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+
+            # Set the QImage as a pixmap on the label
+            self.media_label.setPixmap(QPixmap.fromImage(qimg))
+
+            # Resize the window to match the new image size
+            self.resize(w, h)  # Resize window based on current image size
+
+            # Manually update the layout after resizing
+            self.adjustSize()  # Ensure the window resizes properly
+
     def toggle_pause_play(self):
-        # Toggle the play/pause state
+        # Toggle the play/pause state (only for video)
         self.is_paused = not self.is_paused
 
         if self.is_paused:
