@@ -65,11 +65,22 @@ class VideoPlayerApp(QWidget):
             self.play_video(video_file)
 
     def open_image(self):
+        # Stop video playback if it's running
+        if self.is_video:
+            self.stop_video()
+
         # Open file dialog to select an image
         image_file, _ = QFileDialog.getOpenFileName(self, "Choose Image", "", "Images (*.png *.jpg *.bmp *.jpeg)")
 
         if image_file:
             self.display_image(image_file)
+
+    def stop_video(self):
+        # Stop the video playback
+        self.timer.stop()  # Stop the timer updating frames
+        self.cap.release()  # Release the video capture object
+        self.is_video = False  # Mark as not a video
+        self.media_label.clear()  # Clear the media label
 
     def play_video(self, video_path):
         # Open the video file using OpenCV
