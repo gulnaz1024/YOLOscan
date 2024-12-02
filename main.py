@@ -139,7 +139,10 @@ class VideoPlayerApp(QWidget):
         self.media_label.setPixmap(QPixmap.fromImage(qimg))
 
         # Resize the window based on image size
-        self.resize(w, h)
+        self.resize(w, h)  # Resize window to fit the image
+
+        # Manually update the layout after resizing
+        self.adjustSize()  # Ensure the window resizes properly
 
     def toggle_size(self):
         # Toggle the size of the media (video or image) between full size and half size
@@ -157,8 +160,7 @@ class VideoPlayerApp(QWidget):
         elif not self.is_video and self.image is not None:
             # Resize the image
             if self.is_half_size:
-                self.image = cv2.resize(self.original_image,
-                                        (self.original_image.shape[1] // 2, self.original_image.shape[0] // 2))
+                self.image = cv2.resize(self.original_image, (self.original_image.shape[1] // 2, self.original_image.shape[0] // 2))
             else:
                 # Reset the image to full size
                 self.image = self.original_image.copy()
