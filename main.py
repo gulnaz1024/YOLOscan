@@ -30,8 +30,8 @@ class VideoPlayerApp(QWidget):
         self.toggle_size_button.clicked.connect(self.toggle_size)
         top_layout.addWidget(self.toggle_size_button)
 
-        # Pause/Play button (only for video)
-        self.pause_play_button = QPushButton('Pause')
+        # Play/Pause button (always displays "Play/Pause")
+        self.pause_play_button = QPushButton('Play/Pause')
         self.pause_play_button.clicked.connect(self.toggle_pause_play)
         top_layout.addWidget(self.pause_play_button)
 
@@ -197,10 +197,9 @@ class VideoPlayerApp(QWidget):
         # Toggle the play/pause state (only for video)
         self.is_paused = not self.is_paused
 
-        if self.is_paused:
-            self.pause_play_button.setText('Play')
-        else:
-            self.pause_play_button.setText('Pause')
+        # Set the button text to "Play/Pause" but don't change it
+        # Button functionality remains the same: to toggle between play and pause
+        pass  # No text change here, just leave the function to keep it static
 
 
 if __name__ == "__main__":
