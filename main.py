@@ -118,8 +118,10 @@ class VideoPlayerApp(QWidget):
                 # Resize the window based on video size
                 self.resize(w, h)
             else:
-                self.cap.release()
-                self.timer.stop()  # Stop the timer when video ends
+                # Video has ended, reset it to the beginning
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Reset video to the first frame
+                self.update_frame()  # Start playing from the beginning
+                self.is_paused = False  # Ensure video starts playing immediately after reset
 
     def display_image(self, image_path):
         # Open the image using OpenCV
@@ -197,9 +199,15 @@ class VideoPlayerApp(QWidget):
         # Toggle the play/pause state (only for video)
         self.is_paused = not self.is_paused
 
-        # Set the button text to "Play/Pause" but don't change it
-        # Button functionality remains the same: to toggle between play and pause
-        pass  # No text change here, just leave the function to keep it static
+        if self.is_paused:
+            self.timer.stop()  # Stop the video when paused
+        else:
+            self.timer.start(30)  # Resume video playback
+
+        # If the video has ended and we click Play/Pause, restart from the beginning
+        if self.cap and not self.cap.isOpened() and self.is_paused:
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Reset video to the first frame
+            self.update_frame()  # Start playing from the beginning
 
 
 if __name__ == "__main__":
