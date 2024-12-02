@@ -30,7 +30,7 @@ class VideoPlayerApp(QWidget):
         self.toggle_size_button.clicked.connect(self.toggle_size)
         top_layout.addWidget(self.toggle_size_button)
 
-        # Play/Pause button (always displays "Play/Pause")
+        # Play/Pause button
         self.pause_play_button = QPushButton('Play/Pause')
         self.pause_play_button.clicked.connect(self.toggle_pause_play)
         top_layout.addWidget(self.pause_play_button)
@@ -96,6 +96,9 @@ class VideoPlayerApp(QWidget):
         # Start the timer to read and display frames
         self.timer.start(30)  # 30 ms per frame (~33 FPS)
 
+        # Update button text to "Pause" when video starts playing
+        self.pause_play_button.setText('Pause')
+
     def update_frame(self):
         if self.cap is not None and not self.is_paused:
             ret, frame = self.cap.read()
@@ -121,7 +124,6 @@ class VideoPlayerApp(QWidget):
                 # Video has ended, reset it to the beginning
                 self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Reset video to the first frame
                 self.update_frame()  # Start playing from the beginning
-                self.is_paused = False  # Ensure video starts playing immediately after reset
 
     def display_image(self, image_path):
         # Open the image using OpenCV
@@ -197,17 +199,25 @@ class VideoPlayerApp(QWidget):
 
     def toggle_pause_play(self):
         # Toggle the play/pause state (only for video)
-        self.is_paused = not self.is_paused
+        if self.is_video:
+            self.is_paused = not self.is_paused
 
-        if self.is_paused:
-            self.timer.stop()  # Stop the video when paused
+            if self.is_paused:
+                self.timer.stop()  # Stop the video when paused
+                self.pause_play_button.setText('Play')  # Change button text to 'Play'
+            else:
+                self.timer.start(30)  # Resume video playback
+                self.pause_play_button.setText('Pause')  # Change button text to 'Pause'
+
+            # If the video has ended and we click Play/Pause, restart from the beginning
+            if self.cap and not self.cap.isOpened() and self.is_paused:
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Reset video to the first frame
+                self.update_frame()  # Start playing from the beginning
+                self.is_paused = False  # Ensure video starts playing immediately after reset
+
         else:
-            self.timer.start(30)  # Resume video playback
-
-        # If the video has ended and we click Play/Pause, restart from the beginning
-        if self.cap and not self.cap.isOpened() and self.is_paused:
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Reset video to the first frame
-            self.update_frame()  # Start playing from the beginning
+            # If it's an image, toggle play/pause doesn't apply, so just reset to default behavior
+            self.pause_play_button.setText('Play/Pause')  # Just reset the button text
 
 
 if __name__ == "__main__":
