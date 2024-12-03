@@ -9,7 +9,7 @@ class VideoPlayerApp(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('OpenCV Media Player')
+        self.setWindowTitle('Process Images and Videos with YOLO')
         self.setGeometry(100, 100, 800, 600)
 
         # Layout for the buttons at the top
