@@ -97,7 +97,7 @@ class VideoPlayerApp(QWidget):
             self.stop_video()
 
         # Open file dialog to select an image
-        image_file, _ = QFileDialog.getOpenFileName(self, "Choose Image", "", "Images (*.png *.jpg *.bmp *.jpeg *.tiff *.gif)")
+        image_file, _ = QFileDialog.getOpenFileName(self, "Choose Image", "", "Images (*.png *.jpg *.bmp *.jpeg *.tiff *.gif *.webp)")
 
         if image_file:
             self.display_image(image_file)
