@@ -1,11 +1,11 @@
 import os
 import cv2
 import sys
+from ultralytics import YOLO
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer, Qt
-from ultralytics import YOLO
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QFileDialog, QLabel, QMessageBox, QSlider)
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+                             QFileDialog, QLabel, QMessageBox, QSlider, QProgressBar)
 
 
 class VideoPlayerApp(QWidget):
@@ -76,6 +76,13 @@ class VideoPlayerApp(QWidget):
 
         # Add slider layout to the main layout (this will place the slider at the bottom)
         main_layout.addLayout(slider_layout)
+
+        # Create a progress bar for video processing
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setRange(0, 100)  # Set the range from 0 to 100 (percentage)
+        self.progress_bar.setValue(0)  # Initialize the progress bar to 0
+        self.progress_bar.setVisible(False)  # Initially hide the progress bar
+        main_layout.addWidget(self.progress_bar)  # Add the progress bar to the layout
 
         self.setLayout(main_layout)
 
@@ -379,6 +386,15 @@ class VideoPlayerApp(QWidget):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # codec for .mp4
         out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
+        # Get total number of frames in the video
+        total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        # Show the progress bar
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(0)
+
+        frame_counter = 0
+
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if not ret:
@@ -393,9 +409,17 @@ class VideoPlayerApp(QWidget):
             # Write the processed frame to the output video
             out.write(processed_frame)
 
+            # Update the progress bar
+            frame_counter += 1
+            progress = int((frame_counter / total_frames) * 100)  # Calculate percentage
+            self.progress_bar.setValue(progress)
+
         # Release the video writer and capture objects
         out.release()
         self.cap.release()
+
+        # After processing, hide the progress bar
+        self.progress_bar.setVisible(False)
 
         # After processing, display the processed video
         self.play_video(output_video_path)
