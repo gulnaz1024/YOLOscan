@@ -59,7 +59,7 @@ class VideoPlayerApp(QWidget):
 
     def open_video(self):
         # Open file dialog to select a video
-        video_file, _ = QFileDialog.getOpenFileName(self, "Choose Video", "", "Video Files (*.mp4 *.avi *.mov)")
+        video_file, _ = QFileDialog.getOpenFileName(self, "Choose Video", "", "Video Files (*.mp4 *.avi *.mov *.mkv *.flv *.webm)")
 
         if video_file:
             self.play_video(video_file)
@@ -73,7 +73,7 @@ class VideoPlayerApp(QWidget):
             self.stop_video()
 
         # Open file dialog to select an image
-        image_file, _ = QFileDialog.getOpenFileName(self, "Choose Image", "", "Images (*.png *.jpg *.bmp *.jpeg)")
+        image_file, _ = QFileDialog.getOpenFileName(self, "Choose Image", "", "Images (*.png *.jpg *.bmp *.jpeg *.tiff *.gif)")
 
         if image_file:
             self.display_image(image_file)
