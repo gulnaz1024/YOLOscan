@@ -1,9 +1,8 @@
 import sys
 import cv2
-import numpy as np
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QMessageBox, QSlider
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 
 
 class VideoPlayerApp(QWidget):
@@ -12,6 +11,9 @@ class VideoPlayerApp(QWidget):
 
         self.setWindowTitle('Process Images and Videos with YOLO')
         self.setGeometry(100, 100, 800, 600)
+
+        # Main layout for the window (it will hold the video/image and buttons)
+        main_layout = QVBoxLayout()
 
         # Layout for the buttons at the top
         top_layout = QHBoxLayout()
@@ -41,15 +43,27 @@ class VideoPlayerApp(QWidget):
         self.pause_play_button.setToolTip('Play or pause the video playback')  # Tooltip for the "Play/Pause" button
         top_layout.addWidget(self.pause_play_button)
 
-        # Main layout
-        layout = QVBoxLayout()
-        layout.addLayout(top_layout)
+        # Add the top layout containing buttons to the main layout
+        main_layout.addLayout(top_layout)
 
-        # Video/Image display label
+        # Media display area (video or image)
         self.media_label = QLabel(self)
-        layout.addWidget(self.media_label)
+        main_layout.addWidget(self.media_label)  # The video/image will be displayed here
 
-        self.setLayout(layout)
+        # Create a horizontal layout for the slider at the bottom
+        slider_layout = QHBoxLayout()
+
+        # Video position slider
+        self.video_slider = QSlider(Qt.Horizontal)
+        self.video_slider.setMinimum(0)
+        self.video_slider.setValue(0)
+        self.video_slider.sliderMoved.connect(self.on_slider_move)
+        slider_layout.addWidget(self.video_slider)
+
+        # Add slider layout to the main layout (this will place the slider at the bottom)
+        main_layout.addLayout(slider_layout)
+
+        self.setLayout(main_layout)
 
         # Timer for updating video frames
         self.timer = QTimer(self)
@@ -116,6 +130,10 @@ class VideoPlayerApp(QWidget):
         # Update button text to "Pause" when video starts playing
         self.pause_play_button.setText('Pause')
 
+        # Update slider maximum to the number of frames in the video
+        total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.video_slider.setMaximum(total_frames)
+
     def update_frame(self):
         if self.cap is not None and not self.is_paused:
             ret, frame = self.cap.read()
@@ -137,10 +155,19 @@ class VideoPlayerApp(QWidget):
 
                 # Resize the window based on video size
                 self.resize(w, h)
+
+                # Update slider position
+                current_frame_position = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+                self.video_slider.setValue(current_frame_position)
             else:
                 # Video has ended, reset it to the beginning
                 self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Reset video to the first frame
                 self.update_frame()  # Start playing from the beginning
+
+    def on_slider_move(self, value):
+        # Set the video position based on slider value
+        if self.cap is not None:
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
 
     def display_image(self, image_path):
         # Open the image using OpenCV
@@ -183,7 +210,7 @@ class VideoPlayerApp(QWidget):
         self.adjustSize()  # Ensure the window resizes properly
 
     def toggle_size(self):
-        # Toggle the size of the media (video or image) between full size and half size
+        # Toggle between half size and full size for the image/video
         self.is_half_size = not self.is_half_size
 
         if self.is_half_size:
