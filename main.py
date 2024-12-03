@@ -87,6 +87,10 @@ class VideoPlayerApp(QWidget):
         # Reset "Change Size" button text after a video is loaded
         self.toggle_size_button.setText('Change Size')
 
+        # Show Play/Pause button and slider
+        self.pause_play_button.setVisible(True)
+        self.video_slider.setVisible(True)
+
     def open_image(self):
         # Stop video playback if it's running
         if self.is_video:
@@ -101,12 +105,20 @@ class VideoPlayerApp(QWidget):
         # Reset "Change Size" button text after an image is loaded
         self.toggle_size_button.setText('Change Size')
 
+        # Hide Play/Pause button and slider
+        self.pause_play_button.setVisible(False)
+        self.video_slider.setVisible(False)
+
     def stop_video(self):
         # Stop the video playback
         self.timer.stop()  # Stop the timer updating frames
         self.cap.release()  # Release the video capture object
         self.is_video = False  # Mark as not a video
         self.media_label.clear()  # Clear the media label
+
+        # Hide Play/Pause button and slider after stopping the video
+        self.pause_play_button.setVisible(False)
+        self.video_slider.setVisible(False)
 
     def play_video(self, video_path):
         # Open the video file using OpenCV
@@ -252,6 +264,7 @@ class VideoPlayerApp(QWidget):
         if self.is_video:
             self.is_paused = not self.is_paused
 
+            # Change button text based on the current state
             if self.is_paused:
                 self.timer.stop()  # Stop the video when paused
                 self.pause_play_button.setText('Play')  # Change button text to 'Play'
