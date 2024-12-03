@@ -37,12 +37,6 @@ class VideoPlayerApp(QWidget):
             'Toggle between full size and half size of the media')  # Tooltip for the "Change Size" button
         top_layout.addWidget(self.toggle_size_button)
 
-        # Play/Pause button
-        self.pause_play_button = QPushButton('Play/Pause')
-        self.pause_play_button.clicked.connect(self.toggle_pause_play)
-        self.pause_play_button.setToolTip('Play or pause the video playback')  # Tooltip for the "Play/Pause" button
-        top_layout.addWidget(self.pause_play_button)
-
         # Add the top layout containing buttons to the main layout
         main_layout.addLayout(top_layout)
 
@@ -52,6 +46,12 @@ class VideoPlayerApp(QWidget):
 
         # Create a horizontal layout for the slider at the bottom
         slider_layout = QHBoxLayout()
+
+        # Play/Pause button (moved to the bottom left side)
+        self.pause_play_button = QPushButton('Play/Pause')
+        self.pause_play_button.clicked.connect(self.toggle_pause_play)
+        self.pause_play_button.setToolTip('Play or pause the video playback')  # Tooltip for the "Play/Pause" button
+        slider_layout.addWidget(self.pause_play_button)
 
         # Video position slider
         self.video_slider = QSlider(Qt.Horizontal)
