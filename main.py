@@ -181,6 +181,9 @@ class VideoPlayerApp(QWidget):
                 # Set the QImage as a pixmap on the label
                 self.media_label.setPixmap(QPixmap.fromImage(qimg))
 
+                # Set alignment of the label to center the video
+                self.media_label.setAlignment(Qt.AlignCenter)  # Center the video horizontally and vertically
+
                 # Resize the window based on video size
                 self.resize(w, h)
 
@@ -230,6 +233,9 @@ class VideoPlayerApp(QWidget):
 
         # Set the QImage as a pixmap on the label
         self.media_label.setPixmap(QPixmap.fromImage(qimg))
+
+        # Set alignment of the label to center the image
+        self.media_label.setAlignment(Qt.AlignCenter)  # Center the image horizontally and vertically
 
         # Resize the window based on image size
         self.resize(w, h)  # Resize window to fit the image
