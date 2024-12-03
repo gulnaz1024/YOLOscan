@@ -19,21 +19,26 @@ class VideoPlayerApp(QWidget):
         # Button to choose a video
         self.play_button = QPushButton('Choose Video')
         self.play_button.clicked.connect(self.open_video)
+        self.play_button.setToolTip('Select a video file to open')  # Tooltip for the "Choose Video" button
         top_layout.addWidget(self.play_button)
 
         # Button to choose an image
         self.image_button = QPushButton('Choose Image')
         self.image_button.clicked.connect(self.open_image)
+        self.image_button.setToolTip('Select an image file to open')  # Tooltip for the "Choose Image" button
         top_layout.addWidget(self.image_button)
 
         # Toggle size button
         self.toggle_size_button = QPushButton('Change Size')
         self.toggle_size_button.clicked.connect(self.toggle_size)
+        self.toggle_size_button.setToolTip(
+            'Toggle between full size and half size of the media')  # Tooltip for the "Change Size" button
         top_layout.addWidget(self.toggle_size_button)
 
         # Play/Pause button
         self.pause_play_button = QPushButton('Play/Pause')
         self.pause_play_button.clicked.connect(self.toggle_pause_play)
+        self.pause_play_button.setToolTip('Play or pause the video playback')  # Tooltip for the "Play/Pause" button
         top_layout.addWidget(self.pause_play_button)
 
         # Main layout
