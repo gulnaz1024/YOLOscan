@@ -240,7 +240,50 @@ class VideoPlayerApp(QWidget):
         self.display_image(processed_image_path)
 
     def process_video(self):
-        pass
+        # Define the folder to save the processed video
+        save_folder = "Processed media"
+
+        # Create the folder if it doesn't exist
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+
+        # Check if the video capture object is already opened
+        if not self.cap.isOpened():
+            print("Error: Video file not opened.")
+            return
+
+        # Get the video properties (width, height, FPS)
+        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = self.cap.get(cv2.CAP_PROP_FPS)
+
+        # Define the output video file path
+        output_video_path = os.path.join(save_folder, "processed_video.mp4")
+
+        # Set up the VideoWriter object to save the processed video
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # codec for .mp4
+        out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
+
+        while self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if not ret:
+                break  # Exit if there are no more frames
+
+            # Process the frame with YOLO model
+            results = self.model(frame)
+
+            # Get the processed frame with bounding boxes (plotting the boxes)
+            processed_frame = results[0].plot()  # This is the processed frame
+
+            # Write the processed frame to the output video
+            out.write(processed_frame)
+
+        # Release the video writer and capture objects
+        out.release()
+        self.cap.release()
+
+        # After processing, display the processed video
+        self.play_video(output_video_path)
 
 
 
