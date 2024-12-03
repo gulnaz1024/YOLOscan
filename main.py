@@ -1,9 +1,10 @@
 import sys
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QMessageBox
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer
+
 
 class VideoPlayerApp(QWidget):
     def __init__(self):
@@ -92,8 +93,13 @@ class VideoPlayerApp(QWidget):
         # Open the video file using OpenCV
         self.cap = cv2.VideoCapture(video_path)
 
+        # Check if video was opened successfully
         if not self.cap.isOpened():
+            # Log to console (for debugging purposes)
             print("Error: Could not open video.")
+
+            # Show error message box to the user
+            QMessageBox.critical(self, "Error", "Unsupported video format or file.")
             return
 
         # Mark that the current media is a video
@@ -134,8 +140,14 @@ class VideoPlayerApp(QWidget):
     def display_image(self, image_path):
         # Open the image using OpenCV
         self.image = cv2.imread(image_path)
+
+        # Check if image is None, indicating an error
         if self.image is None:
+            # Log to console (for debugging purposes)
             print("Error: Could not open image.")
+
+            # Show error message box to the user
+            QMessageBox.critical(self, "Error", "Unsupported image format or file.")
             return
 
         # Store the original image for future resizing
