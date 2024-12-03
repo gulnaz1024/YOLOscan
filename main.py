@@ -64,6 +64,9 @@ class VideoPlayerApp(QWidget):
         if video_file:
             self.play_video(video_file)
 
+        # Reset "Change Size" button text after a video is loaded
+        self.toggle_size_button.setText('Change Size')
+
     def open_image(self):
         # Stop video playback if it's running
         if self.is_video:
@@ -74,6 +77,9 @@ class VideoPlayerApp(QWidget):
 
         if image_file:
             self.display_image(image_file)
+
+        # Reset "Change Size" button text after an image is loaded
+        self.toggle_size_button.setText('Change Size')
 
     def stop_video(self):
         # Stop the video playback
