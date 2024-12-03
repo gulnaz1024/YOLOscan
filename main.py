@@ -26,7 +26,7 @@ class VideoPlayerApp(QWidget):
         top_layout.addWidget(self.image_button)
 
         # Toggle size button
-        self.toggle_size_button = QPushButton('Toggle Size (Half Size)')
+        self.toggle_size_button = QPushButton('Change Size')
         self.toggle_size_button.clicked.connect(self.toggle_size)
         top_layout.addWidget(self.toggle_size_button)
 
@@ -164,9 +164,9 @@ class VideoPlayerApp(QWidget):
         self.is_half_size = not self.is_half_size
 
         if self.is_half_size:
-            self.toggle_size_button.setText('Toggle Size (Full Size)')
+            self.toggle_size_button.setText('Full Size')
         else:
-            self.toggle_size_button.setText('Toggle Size (Half Size)')
+            self.toggle_size_button.setText('Half Size')
 
         # If it's a video, adjust the video size
         if self.is_video and self.cap is not None:
